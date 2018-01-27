@@ -30,7 +30,7 @@ func init() {
 func importHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	if err := importTweets(ctx); err != nil {
-		log.Errorf(ctx, "error %+v" err)
+		log.Errorf(ctx, "error %+v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
