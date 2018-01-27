@@ -1,0 +1,9 @@
+service: batch
+runtime: go
+api_version: go1.8
+version: v1
+
+handlers:
+- url: /batch/.*
+  script: _go_app
+  login: admin

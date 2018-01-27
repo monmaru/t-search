@@ -1,0 +1,6 @@
+cron:
+- description: "import tweets"
+  url: /batch/import-tweets
+  target: batch
+  schedule: every day 10:00
+  timezone: Asia/Tokyo
