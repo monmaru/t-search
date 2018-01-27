@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/pkg/errors"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/search"
@@ -29,7 +30,7 @@ func init() {
 func importHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	if err := importTweets(ctx); err != nil {
-		log.Errorf(ctx, err.Error())
+		log.Errorf(ctx, "error %+v" err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -61,7 +62,7 @@ func (d *DueDate) UnmarshalJSON(raw []byte) error {
 	layout := "2006-01-02 15:04:05"
 	t, err := time.Parse(layout, s)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	*d = DueDate(t)
 	return nil
@@ -83,13 +84,13 @@ func fetch(ctx context.Context) ([]Tweet, error) {
 	url := fmt.Sprintf(urlTmpl, yesterday)
 	resp, err := urlfetch.Client(ctx).Get(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	defer resp.Body.Close()
 
 	var tweets []Tweet
 	if err := json.NewDecoder(resp.Body).Decode(&tweets); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return tweets, nil
 }
@@ -106,7 +107,7 @@ func put(ctx context.Context, tweets []Tweet) error {
 
 	index, err := search.Open("tweets")
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	const limit = 200
@@ -128,7 +129,7 @@ func put(ctx context.Context, tweets []Tweet) error {
 			srcs = append(srcs, data)
 		}
 		if _, err := index.PutMulti(ctx, ids, srcs); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 	}
 	return nil
