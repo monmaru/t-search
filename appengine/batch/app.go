@@ -2,6 +2,7 @@ package batch
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -97,7 +98,7 @@ func fetch(ctx context.Context) ([]Tweet, error) {
 
 func put(ctx context.Context, tweets []Tweet) error {
 	type Data struct {
-		ID           string
+		TweetID      string
 		CreatedAt    time.Time
 		UserName     string
 		Text         string
@@ -115,9 +116,10 @@ func put(ctx context.Context, tweets []Tweet) error {
 		var ids []string
 		var srcs []interface{}
 		for _, t := range tmp {
-			ids = append(ids, t.ID)
+			id := base64.StdEncoding.EncodeToString([]byte(t.ID))
+			ids = append(ids, id)
 			data := &Data{
-				ID:           t.ID,
+				TweetID:      t.ID,
 				CreatedAt:    time.Time(t.CreatedAt),
 				UserName:     t.UserName,
 				Text:         t.Text,
