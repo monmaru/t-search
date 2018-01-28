@@ -137,16 +137,17 @@ func put(ctx context.Context, tweets []Tweet) error {
 	return nil
 }
 
-func chunks(l []Tweet, n int) chan []Tweet {
+func chunks(tweets []Tweet, n int) <-chan []Tweet {
 	ch := make(chan []Tweet)
+	size := len(tweets)
 	go func() {
-		for i := 0; i < len(l); i += n {
+		for i := 0; i < size; i += n {
 			from := i
 			to := i + n
-			if to > len(l) {
-				to = len(l)
+			if to > size {
+				to = size
 			}
-			ch <- l[from:to]
+			ch <- tweets[from:to]
 		}
 		close(ch)
 	}()
